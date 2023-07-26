@@ -29,10 +29,10 @@
 -- ('2019-01-04', '2019-02-01', 2, 2),
 -- ('2021-10-01', '2021-10-14', 3, 3);
 
-INSERT INTO property_reviews (
-  guest_id,
-  property_id,
-  reservation_id,
-  rating,
-  message) VALUES ( 1 ,1,13,1,'message'),( 2 ,2,14,2,'message'),( 3 ,3,15,3,'message');
+-- INSERT INTO property_reviews (
+--   guest_id,
+--   property_id,
+--   reservation_id,
+--   rating,
+--   message) VALUES ( 1 ,1,13,1,'message'),( 2 ,2,14,2,'message'),( 3 ,3,15,3,'message');
 
