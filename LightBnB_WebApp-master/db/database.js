@@ -115,18 +115,59 @@ const getAllReservations = function (guest_id, limit = 10) {
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
-const getAllProperties =  (options, limit = 10)=>{
-  const queryString = `SELECT * FROM properties
-  LIMIT $1` ;
-  const values = [limit]
-         return pool
-          .query(queryString,values)
-            .then((result)=>{
-              return result.rows;
-            })
-            .catch((err)=>{
-              console.log(err.message);
-            });
+const getAllProperties = (options, limit = 10) => {
+  // Define the base SQL query
+  let queryString = `
+    SELECT properties.*,
+      AVG(property_reviews.rating) AS average_rating
+    FROM properties
+    LEFT JOIN property_reviews ON properties.id = property_id
+  `;
+
+  // Initialize an array to store query parameters
+  const values = [];
+
+  // Check if the options object is provided and has properties
+  if (options && Object.keys(options).length > 0) {
+    queryString += 'WHERE ';
+    const filters = [];
+
+    // Check each possible filter and add it to the query if it exists in options
+    if (options.city) {
+      filters.push(`city ILIKE $${values.push(`%${options.city}%`)}`);
+    }
+    if (options.owner_id){
+      filters.push(`owner_id = $${values.push(`${options.owner_id}`)}`)
+    }
+    if (options.minimum_price_per_night){
+      filters.push(`cost_per_night >= $${values.push(`${options.minimum_price_per_night * 100}`)}`)
+    }
+    if (options.maximum_price_per_night){
+      filters.push(`cost_per_night <= $${values.push(`${options.maximum_price_per_night * 100}`)}`)
+    }
+
+    // Add other filters here if you have additional options
+
+    // Combine the filters with 'AND' and add them to the query
+    queryString += filters.join(' AND ');
+  }
+
+  // Continue building the SQL query
+  queryString += `
+    GROUP BY properties.id
+    ORDER BY cost_per_night ASC
+    LIMIT $${values.push(limit)};
+  `;
+
+  // Execute the SQL query using the pool
+  return pool
+    .query(queryString, values)
+    .then((result) => {
+      return result.rows;
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
 
 /**
